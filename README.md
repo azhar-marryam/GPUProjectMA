@@ -1,1 +1,1 @@
-# GPUProj
+# GPUProjectMA
