@@ -1,5 +1,4 @@
-# GPUProjectMA
-# GPU-Accelerated Image Processing Suite - Setup Guide
+# GPUProjectMA - GPU-Accelerated Image Processing Suite - Setup Guide
 
 **Authors:** Marryam Azhar (2502069), Asfa Toor (2401097)  
 **Course:** IT00CG19 GPU Programming 2025  
@@ -53,9 +52,9 @@ lspci | grep -i nvidia
 
 You should see your GPU information and driver version.
 Requesting the GPU:
-
+```bash
 module load gcc/10.4.0 cuda/12.1.1
-
+```
 ### Step 2: Create Python Virtual Environment
 
 **Windows:**
@@ -363,8 +362,3 @@ deactivate
 For issues specific to:
 - **CuPy:** https://docs.cupy.dev/
 - **CUDA:** https://docs.nvidia.com/cuda/
-- **Course-related:** Contact course instructor
-
----
-
-**Good luck with your presentation!**
