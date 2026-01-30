@@ -1,0 +1,54 @@
+{
+  "summary": {
+    "average_speedup": 3.6830199245393747,
+    "max_speedup": 8.453097394535577,
+    "min_speedup": 0.4243659900049479,
+    "total_operations": 4
+  },
+  "detailed_metrics": [
+    {
+      "operation": "grayscale",
+      "cpu_time_ms": 4.005013965070248,
+      "gpu_time_ms": 0.4737924784421921,
+      "speedup": 8.453097394535577,
+      "image_size": [
+        512,
+        512
+      ],
+      "memory_mb": 2.75
+    },
+    {
+      "operation": "blur",
+      "cpu_time_ms": 0.294744037091732,
+      "gpu_time_ms": 0.6945515051484108,
+      "speedup": 0.4243659900049479,
+      "image_size": [
+        512,
+        512
+      ],
+      "memory_mb": 1.5
+    },
+    {
+      "operation": "edge",
+      "cpu_time_ms": 1.6408368945121765,
+      "gpu_time_ms": 0.6886463612318039,
+      "speedup": 2.3826988522485744,
+      "image_size": [
+        512,
+        512
+      ],
+      "memory_mb": 1.0
+    },
+    {
+      "operation": "sepia",
+      "cpu_time_ms": 3.946048952639103,
+      "gpu_time_ms": 1.13656185567379,
+      "speedup": 3.4719174613684,
+      "image_size": [
+        512,
+        512
+      ],
+      "memory_mb": 1.5
+    }
+  ]
+}
