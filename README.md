@@ -53,6 +53,7 @@ lspci | grep -i nvidia
 
 You should see your GPU information and driver version.
 Requesting the GPU:
+
 module load gcc/10.4.0 cuda/12.1.1
 
 ### Step 2: Create Python Virtual Environment
