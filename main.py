@@ -16,6 +16,7 @@ from typing import Tuple, List, Dict
 import matplotlib.pyplot as plt
 from dataclasses import dataclass
 import psutil
+from cupyx.scipy import ndimage
 
 
 @dataclass
@@ -58,36 +59,17 @@ class GPUImageProcessor:
         if len(image.shape) == 2:
             return image
         return np.dot(image[..., :3], np.array([0.299, 0.587, 0.114]))
-    
+
     @staticmethod
-    def gaussian_blur_gpu(image: cp.ndarray, kernel_size: int = 5, 
-                         sigma: float = 1.0) -> cp.ndarray:
-        """
-        GPU-accelerated Gaussian blur using separable convolution
-        Optimized with memory coalescing
-        """
-        # Generate 1D Gaussian kernel
-        k = kernel_size // 2
-        x = cp.arange(-k, k + 1)
-        kernel_1d = cp.exp(-(x ** 2) / (2 * sigma ** 2))
-        kernel_1d /= kernel_1d.sum()
-        
-        # Separable convolution: horizontal then vertical
-        # This reduces complexity from O(n²) to O(2n)
+    def gaussian_blur_gpu(image: cp.ndarray, kernel_size: int = 5, sigma: float = 1.0) -> cp.ndarray:
+        # Note: kernel_size is not used by ndimage.gaussian_filter; it derives window from sigma.
         if len(image.shape) == 3:
-            result = cp.zeros_like(image, dtype=cp.float32)
-            for channel in range(image.shape[2]):
-                temp = cp.convolve(image[:, :, channel].ravel(), 
-                                  kernel_1d, mode='same')
-                temp = temp.reshape(image.shape[:2])
-                result[:, :, channel] = cp.convolve(temp.T.ravel(), 
-                                                    kernel_1d, mode='same').reshape(image.shape[:2]).T
+        # Blur across height & width, keep channels unchanged
+            result = ndimage.gaussian_filter(image, sigma=(sigma, sigma, 0))
+            return cp.clip(result, 0, 255).astype(cp.uint8)
         else:
-            temp = cp.convolve(image.ravel(), kernel_1d, mode='same')
-            temp = temp.reshape(image.shape)
-            result = cp.convolve(temp.T.ravel(), kernel_1d, mode='same').reshape(image.shape).T
-        
-        return cp.clip(result, 0, 255).astype(cp.uint8)
+            result = ndimage.gaussian_filter(image, sigma=sigma)
+            return cp.clip(result, 0, 255).astype(cp.uint8)
     
     @staticmethod
     def gaussian_blur_cpu(image: np.ndarray, kernel_size: int = 5, 
@@ -95,41 +77,22 @@ class GPUImageProcessor:
         """CPU version using OpenCV for fair comparison"""
         return cv2.GaussianBlur(image, (kernel_size, kernel_size), sigma)
     
+
     @staticmethod
     def sobel_edge_detection_gpu(image: cp.ndarray) -> cp.ndarray:
-        """
-        GPU-accelerated Sobel edge detection
-        Uses parallel gradient computation in X and Y directions
-        """
-        # Sobel kernels
-        sobel_x = cp.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=cp.float32)
-        sobel_y = cp.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=cp.float32)
-        
-        # Convert to grayscale if needed
         if len(image.shape) == 3:
             gray = GPUImageProcessor.grayscale_gpu(image)
         else:
             gray = image.astype(cp.float32)
-        
-        # Pad image
-        padded = cp.pad(gray, 1, mode='edge')
-        
-        # Compute gradients
-        h, w = gray.shape
-        grad_x = cp.zeros_like(gray)
-        grad_y = cp.zeros_like(gray)
-        
-        for i in range(h):
-            for j in range(w):
-                region = padded[i:i+3, j:j+3]
-                grad_x[i, j] = cp.sum(region * sobel_x)
-                grad_y[i, j] = cp.sum(region * sobel_y)
-        
-        # Compute magnitude
-        magnitude = cp.sqrt(grad_x**2 + grad_y**2)
-        magnitude = cp.clip(magnitude, 0, 255)
-        
-        return magnitude.astype(cp.uint8)
+
+        sx = cp.array([[-1, 0, 1], [-2, 0, 2], [-1, 0, 1]], dtype=cp.float32)
+        sy = cp.array([[-1, -2, -1], [0, 0, 0], [1, 2, 1]], dtype=cp.float32)
+
+        gx = ndimage.convolve(gray, sx)
+        gy = ndimage.convolve(gray, sy)
+
+        magnitude = cp.sqrt(gx**2 + gy**2)
+        return cp.clip(magnitude, 0, 255).astype(cp.uint8)
     
     @staticmethod
     def sobel_edge_detection_cpu(image: np.ndarray) -> np.ndarray:
