@@ -94,13 +94,12 @@ The application runs through five phases automatically:
 •	Report Generation — saves plots, processed images, and metrics.json to results/
 
 Recorded Output
-Verified run on NVIDIA A100-SXM4-40GB MIG 1g.5gb — Compute Capability 8.0 — image: synthetic_checkerboard_large_2048x2048.jpg (2048x2048x3)
-Console — full output
 =================================================================
 GPU-Accelerated Image Processing Suite
-Abo Akademi University — IT00CG19 GPU Programming 2025
+Åbo Akademi University — IT00CG19 GPU Programming 2025
 Custom CUDA Kernels (RawKernel / ElementwiseKernel)
 =================================================================
+
 GPU: NVIDIA A100-SXM4-40GB MIG 1g.5gb
 Compute capability: 8.0
 Total memory: 4.8 GB
@@ -114,12 +113,16 @@ PERFORMANCE BENCHMARKING  (custom CUDA kernels vs CPU)
 
 Benchmarking: grayscale  |  image: (2048, 2048, 3)
   CPU: 63.00 ms  |  GPU: 0.69 ms  |  Speedup: 91.33x  |  GPU Mem: 12.00 MB
+
 Benchmarking: blur  |  image: (2048, 2048, 3)
-  CPU: 3.38 ms   |  GPU: 4.11 ms  |  Speedup: 0.82x   |  GPU Mem: 12.00 MB
+  CPU: 3.38 ms  |  GPU: 4.11 ms  |  Speedup: 0.82x  |  GPU Mem: 12.00 MB
+
 Benchmarking: edge  |  image: (2048, 2048, 3)
   CPU: 47.55 ms  |  GPU: 1.14 ms  |  Speedup: 41.83x  |  GPU Mem: 12.00 MB
+
 Benchmarking: sepia  |  image: (2048, 2048, 3)
-  CPU: 38.43 ms  |  GPU: 0.35 ms  |  Speedup: 111.23x |  GPU Mem: 12.00 MB
+  CPU: 38.43 ms  |  GPU: 0.35 ms  |  Speedup: 111.23x  |  GPU Mem: 12.00 MB
+
 Benchmarking: sharpen  |  image: (2048, 2048, 3)
   CPU: 31.42 ms  |  GPU: 0.53 ms  |  Speedup: 58.80x  |  GPU Mem: 12.00 MB
 
@@ -132,6 +135,7 @@ Processed 5 images in 17.3 ms  (3.5 ms/image)
 GENERATING VISUAL COMPARISONS
 =================================================================
 Saved filter_comparison.png
+
 Performance report saved to results/
 
 =================================================================
@@ -222,9 +226,3 @@ ls results/                  # view output files
 
 Monitor GPU during execution (separate terminal)
 nvidia-smi -l 1
-
-10. References & Resources
-•	CuPy documentation — https://docs.cupy.dev/
-•	CUDA C Programming Guide — https://docs.nvidia.com/cuda/cuda-c-programming-guide/
-•	CUDA Best Practices Guide — https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/
-•	OpenCV documentation — https://docs.opencv.org/
