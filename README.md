@@ -228,5 +228,3 @@ nvidia-smi -l 1
 •	CUDA C Programming Guide — https://docs.nvidia.com/cuda/cuda-c-programming-guide/
 •	CUDA Best Practices Guide — https://docs.nvidia.com/cuda/cuda-c-best-practices-guide/
 •	OpenCV documentation — https://docs.opencv.org/
-
-<img width="504" height="685" alt="image" src="https://github.com/user-attachments/assets/801de19a-d690-4dc3-a577-a9bef8ec9593" />
