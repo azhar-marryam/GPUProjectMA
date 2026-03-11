@@ -42,9 +42,9 @@ import psutil
 #    Input image is passed as three separate channel arrays.
 # ------------------------------------------------------------------------------
 _grayscale_kernel = cp.ElementwiseKernel(
-    in_params='uint8 r, uint8 g, uint8 b',
-    out_params='uint8 gray',
-    operation='gray = (uint8)(0.299f * r + 0.587f * g + 0.114f * b)',
+    in_params='T r, T g, T b',
+    out_params='T gray',
+    operation='gray = (T)(0.299f * (float)r + 0.587f * (float)g + 0.114f * (float)b)',
     name='grayscale_luminosity'
 )
 
@@ -256,12 +256,12 @@ void sharpen(
 #    output = clamp(input * contrast + brightness, 0, 255)
 # ------------------------------------------------------------------------------
 _brightness_contrast_kernel = cp.ElementwiseKernel(
-    in_params='uint8 x, float32 contrast, float32 brightness',
-    out_params='uint8 y',
+    in_params='T x, float32 contrast, float32 brightness',
+    out_params='T y',
     operation='''
         float v = (float)x * contrast + brightness;
         v = v < 0.0f ? 0.0f : (v > 255.0f ? 255.0f : v);
-        y = (uint8)v;
+        y = (T)v;
     ''',
     name='brightness_contrast'
 )
@@ -681,8 +681,9 @@ class GPUImageProcessor:
         axes[0, 0].grid(True, alpha=0.3)
 
         # Plot 2: Speedup
-        axes[0, 1].bar(operations, speedups, color='green', alpha=0.7)
+        axes[0, 1].bar(x, speedups, color='green', alpha=0.7)
         axes[0, 1].axhline(y=1, color='r', linestyle='--', label='Baseline (1x)')
+        axes[0, 1].set_xticks(x)
         axes[0, 1].set_xticklabels(operations, rotation=45)
         axes[0, 1].set_xlabel('Operation')
         axes[0, 1].set_ylabel('Speedup (x)')
@@ -691,8 +692,9 @@ class GPUImageProcessor:
         axes[0, 1].grid(True, alpha=0.3)
 
         # Plot 3: Memory
-        axes[1, 0].plot(operations, memories, marker='o', linewidth=2,
+        axes[1, 0].plot(x, memories, marker='o', linewidth=2,
                         markersize=8, color='purple')
+        axes[1, 0].set_xticks(x)
         axes[1, 0].set_xticklabels(operations, rotation=45)
         axes[1, 0].set_xlabel('Operation')
         axes[1, 0].set_ylabel('GPU Memory (MB)')
@@ -701,7 +703,8 @@ class GPUImageProcessor:
 
         # Plot 4: Throughput
         throughput = [1000.0 / t for t in gpu_times]
-        axes[1, 1].bar(operations, throughput, color='orange', alpha=0.7)
+        axes[1, 1].bar(x, throughput, color='orange', alpha=0.7)
+        axes[1, 1].set_xticks(x)
         axes[1, 1].set_xticklabels(operations, rotation=45)
         axes[1, 1].set_xlabel('Operation')
         axes[1, 1].set_ylabel('Operations / Second')
@@ -773,7 +776,16 @@ def main():
         return
 
     print(f"\nFound {len(image_files)} images.")
-    test_image = cv2.imread(str(image_files[0]))
+
+    # Pick the largest image for benchmarking — GPU advantage only becomes
+    # clear on large images where parallelism outweighs kernel launch overhead.
+    def _image_pixels(p):
+        img = cv2.imread(str(p))
+        return img.shape[0] * img.shape[1] if img is not None else 0
+
+    largest_file = max(image_files, key=_image_pixels)
+    test_image   = cv2.imread(str(largest_file))
+    print(f"Using largest image for benchmarks: {largest_file.name}  {test_image.shape}")
 
     # ------------------------------------------------------------------
     # Benchmarking
