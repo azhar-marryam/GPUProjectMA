@@ -2,7 +2,7 @@
 Real-Time GPU-Accelerated Image Processing Suite
 Authors: Marryam Azhar, Asfa Toor
 Course: IT00CG19 GPU Programming 2025
-Åbo Akademi University
+Åbo Akademi University, Turku
 
 Revised to implement custom CUDA kernels via CuPy RawKernel and
 ElementwiseKernel, demonstrating low-level GPU programming:
